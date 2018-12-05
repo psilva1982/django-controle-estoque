@@ -5,7 +5,10 @@ from produtos.models import (
 )
 
 class EstoqueAdmin(admin.ModelAdmin):
-    list_display = ['produto', 'quantidade', 'valor' ]
+    list_display = ['produto', 'produto_descricao', 'quantidade', 'valor' ]
+
+    def produto_descricao(self, obj):
+        return obj.produto.descricao 
 
 # Register your models here.
 admin.site.register(Produto)
