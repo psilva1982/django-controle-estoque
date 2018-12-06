@@ -3,7 +3,7 @@ from produtos.models import Produto
 
 class ProdutoAdmin(admin.ModelAdmin):
     list_display = ['sku', 'descricao', 'valor', 'estoque' ]
-
+    exclude = ('estoque',)
 
 
 # Register your models here.
