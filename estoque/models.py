@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import m2m_changed, post_save, pre_save
+from django.db.models.signals import m2m_changed, post_save, pre_save, pre_delete
 from django.dispatch import receiver
 
 from produtos.models import Produto
@@ -81,4 +81,15 @@ def atualiza_estoque(sender, instance, **kwargs):
                 produto.estoque += diferenca            
            
             
+    produto.save()
+
+@receiver(pre_delete, sender=MovimentoEstoque)
+def remove_movimento(sender, instance, **kwargs):
+    produto = instance.produto 
+    if instance.tipo_movimento == 'en' :
+        produto.estoque -= instance.quantidade
+    
+    else:
+        produto.estoque += instance.quantidade
+    
     produto.save()
