@@ -1,7 +1,7 @@
 from django.db import models
 
 from clientes.models import Cliente
-from produtos.models import Produto
+from estoque.models import Produto
 from estoque.models import MovimentoEstoque
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.db.models import Sum, F, FloatField, Max
@@ -55,30 +55,41 @@ def update_vendas_total(sender, instance, **kwargs):
     instance.get_total()
 
 @receiver(pre_save, sender=ItemVenda)
-def atualiza_estoque(sender, instance, **kwargs):
+def movimenta_estoque(sender, instance, **kwargs):
     
-    item_existente = ItemVenda.objects.filter(id=instance.id) 
+    estoque = MovimentoEstoque.objects.filter(numero=str(instance.venda.id))
     produto = instance.produto
 
     # Se não existe
-    if len(item_existente) == 0: 
-        produto.estoque -= instance.quantidade
+    if len(estoque) == 0:
+        estoque = MovimentoEstoque.objects.create(
+            data_hora = instance.venda.data,
+            produto=produto,
+            valor=produto.valor,
+            numero=str(instance.venda.id),
+            tipo_movimento='sd',
+            motivo_movimento='vd',
+            quantidade=instance.quantidade
+        )
     
+        estoque.save()
          
     # Se existe
     else:
-        quantidade_atual = item_existente[0].quantidade
+        quantidade_atual = estoque[0].quantidade
+        
         diferenca = 0
+        
 
        # Quantidade atual menor que nova quantidade
         if quantidade_atual < instance.quantidade:
 
             diferenca = instance.quantidade - quantidade_atual
-            produto.estoque -= diferenca
+            estoque[0].quantidade += diferenca
         
-        elif quantidade_atual > instance.quantidade:
+        else:
             diferenca = quantidade_atual - instance.quantidade
-            produto.estoque += diferenca
-            
-    produto.save()
-
+            estoque[0].quantidade -= diferenca
+        
+        estoque[0].save()
+    
