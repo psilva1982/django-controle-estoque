@@ -9,7 +9,8 @@ class ItemPedidoInline(admin.TabularInline):
     extra = 1
 
 class VendaAdmin(admin.ModelAdmin):
-    readonly_fields = ('valor',)
+    list_display = ['data', 'cliente', 'vendedor', 'valor']
+    readonly_fields = ('valor', )
     inlines = [ItemPedidoInline]
 
 class ItemVendaAdmin(admin.ModelAdmin):

@@ -11,4 +11,4 @@ class Produto(models.Model):
     estoque = models.IntegerField(validators=[MinValueValidator(0)],default=0)
     
     def __str__(self):
-        return self.sku
+        return self.sku + ' - ' + self.descricao
